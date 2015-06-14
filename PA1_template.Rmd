@@ -34,13 +34,16 @@ total_intervals = length(raw_intervals)
 sampling_interval = raw_intervals[2] - raw_intervals[1]
 
 exploratory_message = paste("With a time interval of ",sampling_interval," minutes the recorded data set is expected to contain ",24*60/sampling_interval," entries per day",sep="")
-exploratory_result = "Dataset has the expected number of time interval entries. Note this is just a quick sanity check and does not cover if dates have duplicated and such."
+exploratory_result = "Dataset has the expected number of time interval entries. Note this is just a quick sanity check and does not cover if dates have been duplicated and such."
+```
 
+A quick sanity check on the data set was carried out.
+``` {R}
 if (sampling_interval * total_intervals != 24*60 ) {
 	exploratory_result = "Data is corrupt. Sampling events either exceeds or falls short of expected number."
 }
 ```
-A quick sanity check on the data set was carried out. `r exploratory_message`  
+`r exploratory_message`  
 **`r exploratory_result`**
 
 # Raw data to tidy data
@@ -102,7 +105,6 @@ There are a total of `r total_NA_values` NA values in the dataset
 
 #### A strategy for filling in all of the missing values in the dataset. 
 Imputing missing values is a complicated subject with a lot of theory behind it. The simplest way to impute is to use the mean across similar samples. This is the approach taken here.
-implemented in the impute.mean function in the HotDeckImputation package.
 
 #### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 The impute strategy described above is implemented in the impute.mean function in the HotDeckImputation package. The impute.mean replaces the NAs with the colmeans.

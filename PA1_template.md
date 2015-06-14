@@ -26,6 +26,22 @@ The file contents are read into a dataframe. The dataframe is converted to a dat
 
 ```r
 require(data.table)
+```
+
+```
+## Loading required package: data.table
+```
+
+```
+## Warning: package 'data.table' was built under R version 3.1.3
+```
+
+```
+## data.table 1.9.4  For help type: ?data.table
+## *** NB: by=.EACHI is now explicit. See README to restore previous behaviour.
+```
+
+```r
 raw_activity_dt = fread("data_dir/activity.csv")
 setkeyv(raw_activity_dt,c("date","interval"))
 
@@ -37,14 +53,18 @@ total_intervals = length(raw_intervals)
 sampling_interval = raw_intervals[2] - raw_intervals[1]
 
 exploratory_message = paste("With a time interval of ",sampling_interval," minutes the recorded data set is expected to contain ",24*60/sampling_interval," entries per day",sep="")
-exploratory_result = "Dataset has the expected number of time interval entries. Note this is just a quick sanity check and does not cover if dates have duplicated and such."
+exploratory_result = "Dataset has the expected number of time interval entries. Note this is just a quick sanity check and does not cover if dates have been duplicated and such."
+```
 
+A quick sanity check on the data set was carried out.
+
+```r
 if (sampling_interval * total_intervals != 24*60 ) {
 	exploratory_result = "Data is corrupt. Sampling events either exceeds or falls short of expected number."
 }
 ```
-A quick sanity check on the data set was carried out. With a time interval of 5 minutes the recorded data set is expected to contain 288 entries per day  
-**Dataset has the expected number of time interval entries. Note this is just a quick sanity check and does not cover if dates have duplicated and such.**
+With a time interval of 5 minutes the recorded data set is expected to contain 288 entries per day  
+**Dataset has the expected number of time interval entries. Note this is just a quick sanity check and does not cover if dates have been duplicated and such.**
 
 # Raw data to tidy data
 The dataset with its repeating indices (interval and date) is best stored as a matrix, especially since the raw data was sorted by date and interval after being read in. This has the added advatage of replacing loops or plyr statements with simple row/col sums.
@@ -87,7 +107,7 @@ Here is a histogram depicting this data.
 hist(total_steps_given_day, col="red", main="A histogram of the total steps taken a day",breaks=20,xlab="Total Steps a day")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 # The average daily pattern
 The time intervals in the file are not standard date/time object. To correctly plot the average daily pattern these raw intervals are converted to standard date/time objects.
@@ -105,7 +125,7 @@ Here is a plot of the average daily pattern
 plot(tidy_intervals,mean_steps_an_interval,main="Mean steps for a given sampling interval",xlab = "Sampling Time",ylab = "Mean steps",type="l",xaxs="i")
 ```
 
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
 ***
 
 #### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -126,13 +146,22 @@ There are a total of 2304 NA values in the dataset
 
 #### A strategy for filling in all of the missing values in the dataset. 
 Imputing missing values is a complicated subject with a lot of theory behind it. The simplest way to impute is to use the mean across similar samples. This is the approach taken here.
-implemented in the impute.mean function in the HotDeckImputation package.
 
 #### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 The impute strategy described above is implemented in the impute.mean function in the HotDeckImputation package. The impute.mean replaces the NAs with the colmeans.
 
 ```r
 library('HotDeckImputation')
+```
+
+```
+## This is HotDeckImputation version 1.0.0.
+## Academic users, please be sure to use: citation("HotDeckImputation").
+## Feel free to contact the Maintainer about liscensing, feature requests, etc.
+## Use suppressPackageStartupMessages to eliminate package startup messages.
+```
+
+```r
 imputed_activity_matrix = impute.mean(DATA=tidy_activity_matrix)
 ```
 
@@ -148,7 +177,7 @@ Here is a histogram of the imputed data set along with the mean and median calcu
 hist(imputed_total_steps_given_day, col="red", main="A histogram of the total IMPUTED steps taken a day",breaks=20,xlab="Total Steps a day")
 ```
 
-![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
+![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-16-1.png) 
 
 ```r
 mean_imputed_total_steps_given_day = mean(imputed_total_steps_given_day)
@@ -190,6 +219,33 @@ Time series plots occur in all sorts of cases and converting this data to a time
 
 ```r
 library('xts')
+```
+
+```
+## Loading required package: zoo
+```
+
+```
+## Warning: package 'zoo' was built under R version 3.1.3
+```
+
+```
+## 
+## Attaching package: 'zoo'
+## 
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+## 
+## 
+## Attaching package: 'xts'
+## 
+## The following object is masked from 'package:data.table':
+## 
+##     last
+```
+
+```r
 combined_timeseries_mean_steps = xts(cbind(imputed_activity_Wend_mean_steps_an_interval,imputed_activity_Wday_mean_steps_an_interval),tidy_intervals)
 ```
 Now I have a multivariate time series object with the correct time intervals attaches as date objects. "xtsExtra" package has a plot.xts function that would have made plotting mvts easy but unfortunately is not compatible with the version of R installed on my mac. 
@@ -200,4 +256,4 @@ combined_timeseries_mean_steps.zoo = as.zoo(combined_timeseries_mean_steps)
 plot(combined_timeseries_mean_steps.zoo,main = "Mutivariate time series plot of mean_steps an interval",xlab = "Sampling times",ylab = list( "Weekend: mean_steps", "Weekday: mean_steps"),xaxs='i')
 ```
 
-![plot of chunk unnamed-chunk-20](figure/unnamed-chunk-20-1.png) 
+![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21-1.png) 
